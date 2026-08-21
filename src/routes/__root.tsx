@@ -8,7 +8,9 @@ import {
   Scripts,
 } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
+import { Scale } from "lucide-react";
 
+import { Toaster } from "@/components/ui/sonner";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 
@@ -77,14 +79,19 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { title: "LedgerMatch — Bank Reconciliation Assistant" },
+      {
+        name: "description",
+        content:
+          "Match cashbook and bank statement transactions, flag exceptions and export a clean reconciliation report.",
+      },
+      { property: "og:title", content: "LedgerMatch — Bank Reconciliation Assistant" },
+      {
+        property: "og:description",
+        content: "A simple reconciliation assistant for bookkeepers and accounting trainees.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:site", content: "@Lovable" },
     ],
     links: [
       {
@@ -114,13 +121,46 @@ function RootShell({ children }: { children: ReactNode }) {
   );
 }
 
+const NAV = [
+  { to: "/", label: "Input" },
+  { to: "/results", label: "Matching Results" },
+  { to: "/summary", label: "Summary" },
+] as const;
+
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
 
   return (
     <QueryClientProvider client={queryClient}>
-      {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-      <Outlet />
+      <div className="min-h-screen bg-background">
+        <header className="bg-navy text-navy-foreground">
+          <div className="mx-auto flex max-w-6xl flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
+            <Link to="/" className="flex items-center gap-2">
+              <Scale className="size-5" />
+              <span className="text-lg font-semibold tracking-tight">LedgerMatch</span>
+            </Link>
+            <nav className="flex gap-1 overflow-x-auto">
+              {NAV.map((item) => (
+                <Link
+                  key={item.to}
+                  to={item.to}
+                  activeOptions={{ exact: item.to === "/" }}
+                  className="whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium text-navy-foreground/75 transition-colors hover:bg-sidebar-accent hover:text-navy-foreground"
+                  activeProps={{ className: "bg-sidebar-accent !text-navy-foreground" }}
+                >
+                  {item.label}
+                </Link>
+              ))}
+            </nav>
+          </div>
+        </header>
+        <main className="mx-auto max-w-6xl px-4 py-6 sm:py-8">
+          {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+          <Outlet />
+        </main>
+      </div>
+      <Toaster />
     </QueryClientProvider>
   );
 }
+

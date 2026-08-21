@@ -1,24 +1,54 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { EntryTable } from "@/components/EntryTable";
+import { Button } from "@/components/ui/button";
+import { useLedger } from "@/lib/ledger-store";
+import { ArrowRight } from "lucide-react";
 
-// No head() here: the home route inherits title/description/og/twitter from
-// __root.tsx, and ships no og:image so serve-time hosting can inject the
-// project's social preview (explicit og:image or latest screenshot).
 export const Route = createFileRoute("/")({
-  component: Index,
+  head: () => ({
+    meta: [
+      { title: "LedgerMatch — Bank Reconciliation Assistant" },
+      {
+        name: "description",
+        content:
+          "Enter or paste cashbook and bank statement transactions and let LedgerMatch match them automatically.",
+      },
+      { property: "og:title", content: "LedgerMatch — Bank Reconciliation Assistant" },
+      {
+        property: "og:description",
+        content: "Match cashbook and bank statement entries, flag exceptions and export a report.",
+      },
+    ],
+  }),
+  component: InputPage,
 });
 
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
-function Index() {
+function InputPage() {
+  const { cashbook, bank } = useLedger();
+
   return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
+    <div className="space-y-6">
+      <header className="space-y-1">
+        <h1 className="text-2xl font-semibold tracking-tight">Transaction input</h1>
+        <p className="text-sm text-muted-foreground">
+          Add entries one at a time or paste rows as{" "}
+          <span className="font-medium">date, description, reference, amount</span> (comma or tab
+          separated).
+        </p>
+      </header>
+
+      <div className="grid gap-6 lg:grid-cols-2">
+        <EntryTable side="cashbook" title="Cashbook Entries" entries={cashbook} />
+        <EntryTable side="bank" title="Bank Statement Entries" entries={bank} />
+      </div>
+
+      <div className="flex justify-end">
+        <Button asChild>
+          <Link to="/results">
+            Run matching <ArrowRight className="size-4" />
+          </Link>
+        </Button>
+      </div>
     </div>
   );
 }
